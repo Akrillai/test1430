@@ -2,25 +2,6 @@
 
 ######
 # create ec2 default security group
-
-resource "aws_key_pair" "TF_key" {
-  key_name   = "TF_key"
-  public_key = tls_private_key.rsa.public_key_openssh
-}
-
-resource "tls_private_key" "rsa" {
-  algorithm = "RSA"
-  rsa_bits  = 4096
-}
-
-resource "local_file" "TF-key" {
-    content  = tls_private_key.rsa.private_key_pem
-    filename = "tfkey"
-}
-
-
-
-
 resource "aws_security_group" "sg_default" {
   name = var.securityGroupDefault
   description = "[Terraform] Default ACL"
@@ -67,7 +48,7 @@ resource "aws_security_group" "sg_web" {
 resource "aws_instance" "builder_instance" {
   ami                        = var.ami
   instance_type              = var.instanceType
-  key_name = "TF_key"
+  key_name                   = var.keyName
   vpc_security_group_ids     = [ aws_security_group.sg_default.id ]
 
   tags = {
@@ -83,7 +64,7 @@ resource "aws_instance" "builder_instance" {
 resource "aws_instance" "webserver_instance" {
   ami                        = var.ami
   instance_type              = var.instanceType
-  key_name = "TF_key"
+  key_name                   = var.keyName
   vpc_security_group_ids     = [ aws_security_group.sg_default.id,
                                  aws_security_group.sg_web.id ]
 
