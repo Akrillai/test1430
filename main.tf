@@ -48,7 +48,7 @@ resource "aws_security_group" "sg_web" {
 resource "aws_instance" "builder_instance" {
   ami                        = var.ami
   instance_type              = var.instanceType
-  key_name                   = var.keyName
+  key_name                   = "AWS_EC2s"
   vpc_security_group_ids     = [ aws_security_group.sg_default.id ]
 
   tags = {
@@ -64,7 +64,7 @@ resource "aws_instance" "builder_instance" {
 resource "aws_instance" "webserver_instance" {
   ami                        = var.ami
   instance_type              = var.instanceType
-  key_name                   = var.keyName
+  key_name                   = "AWS_EC2s"
   vpc_security_group_ids     = [ aws_security_group.sg_default.id,
                                  aws_security_group.sg_web.id ]
 
