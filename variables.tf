@@ -1,7 +1,7 @@
 # variables.tf
 
 variable "keyName" {
-   default = "<Place here the ssh key name in ASW EC2>"
+   default = "aws-ec2-key.pub"
 }
 
 variable "region" {
