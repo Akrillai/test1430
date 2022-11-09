@@ -1,7 +1,7 @@
 # variables.tf
 
 variable "keyName" {
-   default = "devops-cert_task-key"
+   default = "AWS_EC2s"
 }
 
 variable "region" {
