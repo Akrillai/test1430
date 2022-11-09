@@ -11,63 +11,21 @@ pipeline {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
 		DOCKERHUB_CREDENTIALS=credentials('dockerhub')
-
-        TF_VAR_keyName = 'devops-cert_task-key'
-
         sshCredsID = 'AWS_UBUNTU_INSTANCE_SSH_KEY'
-        repositoryName = 'cert_task'
-        registryCredsID = 'AWS_ECR_CREDENTIALS'
-        registryHost = '871643195384.dkr.ecr.eu-west-2.amazonaws.com'
     }
 
     stages {
 
-        ///////////////////////////////
-        /// Terrafotm stages
-        ///////////////////////////////
-
         stage('Plan') {
-            when {
-                not {
-                    equals( expected: true, actual: params.destroy )
-                }
-            }
-
             steps {
                 sh 'terraform init -input=false'
                 sh "terraform plan -input=false -out tfplan"
-                sh 'terraform show -no-color tfplan > tfplan.txt'
             }
-        } // stage Plan
-
-        stage('Approval') {
-            when {
-                not {
-                    equals( expected: true, actual: params.autoApprove )
-                }
-                not {
-                    equals( expected: true, actual: params.destroy )
-                }
-            }
-
-            steps {
-                script {
-                    def plan = readFile 'tfplan.txt'
-                    input message: "Do you want to apply the plan?",
-                    parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
-                }
-            }
-        } // stage Approval
+        }
 
         stage('Apply') {
-            when {
-                not {
-                    equals( expected: true, actual: params.destroy )
-                }
-            }
-            
             steps {
-                sh "terraform apply -input=false tfplan"
+                sh "terraform apply"
                 script {
                     builderDnsName = sh(
                        script: "terraform output -raw builder_dns_name",
@@ -79,18 +37,10 @@ pipeline {
                     ).trim()
                 }
             }
-        } // stage Apply
+        } 
 
-        ///////////////////////////////
-        /// Ansible stages
-        ///////////////////////////////
 
         stage('Ansible playbook') {
-            when {
-                not {
-                    equals( expected: true, actual: params.destroy )
-                }
-            }
 
             steps {
                 sh "if [ -f hosts ]; then rm hosts; fi"
@@ -106,74 +56,43 @@ pipeline {
                     become: true,
                 )
             }
-        } // stage Ansible playbook
+        } 
 
-        ///////////////////////////////
-        /// Builder stages
-        ///////////////////////////////
 
-        // stage('Builder fetch and build') {
-        //     when {
-        //         not {
-        //             equals( expected: true, actual: params.destroy )
-        //         }
-        //     }
+        stage('Builder fetch and build') {
+            environment {
+                DOCKER_HOST="ssh://ubuntu@${builderDnsName}"
+            }
+            steps {
+                sshagent( credentials:["${sshCredsID}"] ) {
+                    sh "docker build -t brandani/mywebapp_boxfuser:latest ."
+                    sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
+                    sh 'docker push brandani/mywebapp_boxfuser:latest'
 
-        //     environment {
-        //         DOCKER_HOST="ssh://ubuntu@${builderDnsName}"
-        //     }
-
-        //     steps {
-        //         sshagent( credentials:["${sshCredsID}"] ) {
-        //             sh "docker build --build-arg APPVERSION=${params.appVersion} --tag ${registryHost}/${repositoryName}:${params.appVersion} ."
-        //         }
-        //     }
-
-        stage('Docker Build and Tag') {
-                steps {
-                    
-                        sh 'docker build -t brandani/mywebapp_boxfuser:latest .' 
-                    
                 }
             }
 
-        stage('Login') {
-
-            steps {
-                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
-            }
-        }
-
-        stage('Push') {
-
-            steps {
-                sh 'docker push brandani/mywebapp_boxfuser:latest'
-            }
-        }
-
-
         stage('Webserver stop and remove') {
-
+            environment {
+                DOCKER_HOST="ssh://ubuntu@${webserverDnsName}"
+            }
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
                     sh "for ID in \$(docker ps -q); do docker stop \$ID; done"
                     sh "for ID in \$(docker ps -a -q); do docker rm \$ID; done"
-                    sh "for ID in \$(docker images -q); do docker rmi \$ID; done"
+                    sh "for ID in \$(docker images -q); do docker rmi \$ID; done"}
                 }
             }
-        } // stage Webserver stop and remove
 
         stage('Run Docker container on remote hosts') {
-                    
-
+            environment {
+                DOCKER_HOST="ssh://ubuntu@${webserverDnsName}"
+            }
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
-                    sh "docker -H run -d -p 8060:8080 brandani/mywebapp_boxfuser"
-                
+                    sh "docker -H run -d -p 8080:8080 brandani/mywebapp_boxfuser"}
                 }
             }
-                }
-
 
 
          // stage Builder fetch and build

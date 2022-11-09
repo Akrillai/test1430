@@ -21,6 +21,14 @@
         groups: docker
         append: true
 
+    - name: Maven when cloned ok
+      shell:
+        cmd: chmod 777 /var/run/docker.sock
+
+
+chmod 777 /var/run/docker.sock
+
+
 - name: Webserver preparing
   hosts: webserver
   become: true
