@@ -10,6 +10,7 @@ pipeline {
     environment {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+		DOCKERHUB_CREDENTIALS=credentials('dockerhub')
 
         TF_VAR_keyName = 'devops-cert_task-key'
 
@@ -111,58 +112,47 @@ pipeline {
         /// Builder stages
         ///////////////////////////////
 
-        stage('Builder fetch and build') {
-            when {
-                not {
-                    equals( expected: true, actual: params.destroy )
+        // stage('Builder fetch and build') {
+        //     when {
+        //         not {
+        //             equals( expected: true, actual: params.destroy )
+        //         }
+        //     }
+
+        //     environment {
+        //         DOCKER_HOST="ssh://ubuntu@${builderDnsName}"
+        //     }
+
+        //     steps {
+        //         sshagent( credentials:["${sshCredsID}"] ) {
+        //             sh "docker build --build-arg APPVERSION=${params.appVersion} --tag ${registryHost}/${repositoryName}:${params.appVersion} ."
+        //         }
+        //     }
+
+        stage('Docker Build and Tag') {
+                steps {
+                    
+                        sh 'docker build -t brandani/mywebapp_boxfuser:latest .' 
+                    
                 }
             }
 
-            environment {
-                DOCKER_HOST="ssh://ubuntu@${builderDnsName}"
-            }
+        stage('Login') {
 
             steps {
-                sshagent( credentials:["${sshCredsID}"] ) {
-                    sh "docker build --build-arg APPVERSION=${params.appVersion} --tag ${registryHost}/${repositoryName}:${params.appVersion} ."
-                }
+                sh 'echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin'
             }
-        } // stage Builder fetch and build
+        }
 
-        stage('Builder push to the registry') {
-            when {
-                not {
-                    equals( expected: true, actual: params.destroy )
-                }
-            }
-
-            environment {
-                DOCKER_HOST="ssh://ubuntu@${builderDnsName}"
-            }
+        stage('Push') {
 
             steps {
-                sshagent( credentials:["${sshCredsID}"] ) {
-                    withDockerRegistry( [credentialsId:"${registryCredsID}", url:"https://${registryHost}"] ) {
-                        sh "docker push ${registryHost}/${repositoryName}:${params.appVersion}"
-                    }
-                }
+                sh 'docker push brandani/mywebapp_boxfuser:latest'
             }
-        } // stage Builder push to the registry
+        }
 
-        ///////////////////////////////
-        /// Webserver stages
-        ///////////////////////////////
 
         stage('Webserver stop and remove') {
-            when {
-                not {
-                    equals( expected: true, actual: params.destroy )
-                }
-            }
-
-            environment {
-                DOCKER_HOST="ssh://ubuntu@${webserverDnsName}"
-            }
 
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
@@ -173,44 +163,85 @@ pipeline {
             }
         } // stage Webserver stop and remove
 
-        stage('Webserver pull and start') {
-            when {
-                not {
-                    equals( expected: true, actual: params.destroy )
-                }
-            }
-
-            environment {
-                DOCKER_HOST="ssh://ubuntu@${webserverDnsName}"
-            }
+        stage('Run Docker container on remote hosts') {
+                    
 
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
-                    withDockerRegistry( [credentialsId:"${registryCredsID}", url:"https://${registryHost}"] ) {
-                        sh "docker pull ${registryHost}/${repositoryName}:${params.appVersion}"
-                    }
-                    sh "docker run -p 80:5000 -d ${registryHost}/${repositoryName}:${params.appVersion}"
-                    echo "########################################################################################"
-                    echo "### curl http://${webserverDnsName}"
-                    echo "########################################################################################"
+                    sh "docker -H run -d -p 8060:8080 brandani/mywebapp_boxfuser"
+                
                 }
             }
-        } // stage Webserver pull and start
+                }
+
+
+
+         // stage Builder fetch and build
+
+        // stage('Builder push to the registry') {
+        //     when {
+        //         not {
+        //             equals( expected: true, actual: params.destroy )
+        //         }
+        //     }
+
+        //     environment {
+        //         DOCKER_HOST="ssh://ubuntu@${builderDnsName}"
+        //     }
+
+        //     steps {
+        //         sshagent( credentials:["${sshCredsID}"] ) {
+        //             withDockerRegistry( [credentialsId:"${registryCredsID}", url:"https://${registryHost}"] ) {
+        //                 sh "docker push ${registryHost}/${repositoryName}:${params.appVersion}"
+        //             }
+        //         }
+        //     }
+        // } // stage Builder push to the registry
+
+        ///////////////////////////////
+        /// Webserver stages
+        ///////////////////////////////
+
+
+
+        // stage('Webserver pull and start') {
+        //     when {
+        //         not {
+        //             equals( expected: true, actual: params.destroy )
+        //         }
+        //     }
+
+        //     environment {
+        //         DOCKER_HOST="ssh://ubuntu@${webserverDnsName}"
+        //     }
+
+        //     steps {
+        //         sshagent( credentials:["${sshCredsID}"] ) {
+        //             withDockerRegistry( [credentialsId:"${registryCredsID}", url:"https://${registryHost}"] ) {
+        //                 sh "docker pull ${registryHost}/${repositoryName}:${params.appVersion}"
+        //             }
+        //             sh "docker run -p 80:5000 -d ${registryHost}/${repositoryName}:${params.appVersion}"
+        //             echo "########################################################################################"
+        //             echo "### curl http://${webserverDnsName}"
+        //             echo "########################################################################################"
+        //         }
+        //     }
+        // } // stage Webserver pull and start
 
         ///////////////////////////////////
         /// Terraform Destroy and cleanws
         ///////////////////////////////////
 
-        stage('Destroy') {
-            when {
-                equals( expected: true, actual: params.destroy )
-            }
+        // stage('Destroy') {
+        //     when {
+        //         equals( expected: true, actual: params.destroy )
+        //     }
         
-            steps {
-                sh 'terraform destroy --auto-approve'
-                cleanWs()
-            }
-        } // stage Destroy
+        //     steps {
+        //         sh 'terraform destroy --auto-approve'
+        //         cleanWs()
+        //     }
+        // } // stage Destroy
 
     } // stages
 }
