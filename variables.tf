@@ -5,7 +5,7 @@ variable "keyName" {
 }
 
 variable "region" {
-   default = "eu-central-1"
+   default = "eu-west-2"
 }
 
 variable "instanceType" {
@@ -14,7 +14,7 @@ variable "instanceType" {
 
 # Ubuntu 22.04
 variable "ami" {
-   default = "ami-0caef02b518350c8b"
+   default = "ami-04842bc62789b682e"
 }
 
 variable "securityGroupDefault" {
