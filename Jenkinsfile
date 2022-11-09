@@ -1,6 +1,7 @@
 pipeline {
     parameters {
         string(name: "appVersion", defaultValue: "1.0")
+        string(name: "ecrHost", defaultValue: "")
         booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
         booleanParam(name: 'destroy', defaultValue: false, description: 'Destroy Terraform build?')
     }
@@ -10,7 +11,9 @@ pipeline {
     environment {
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+
         TF_VAR_keyName = 'devops-cert_task-key'
+
         sshCredsID = 'AWS_UBUNTU_INSTANCE_SSH_KEY'
         repositoryName = 'cert_task'
         registryCredsID = 'AWS_ECR_CREDENTIALS'
@@ -121,7 +124,7 @@ pipeline {
 
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
-                    sh "docker build --build-arg APPVERSION=${params.appVersion} --tag ${registryHost}/${repositoryName}:${params.appVersion} ."
+                    sh "docker build --build-arg APPVERSION=${params.appVersion} --tag ${params.ecrHost}/${repositoryName}:${params.appVersion} ."
                 }
             }
         } // stage Builder fetch and build
@@ -139,8 +142,8 @@ pipeline {
 
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
-                    withDockerRegistry( [credentialsId:"${registryCredsID}", url:"https://${registryHost}"] ) {
-                        sh "docker push ${registryHost}/${repositoryName}:${params.appVersion}"
+                    withDockerRegistry( [credentialsId:"${registryCredsID}", url:"https://${params.ecrHost}"] ) {
+                        sh "docker push ${params.ecrHost}/${repositoryName}:${params.appVersion}"
                     }
                 }
             }
@@ -183,10 +186,10 @@ pipeline {
 
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
-                    withDockerRegistry( [credentialsId:"${registryCredsID}", url:"https://${registryHost}"] ) {
-                        sh "docker pull ${registryHost}/${repositoryName}:${params.appVersion}"
+                    withDockerRegistry( [credentialsId:"${registryCredsID}", url:"https://${params.ecrHost}"] ) {
+                        sh "docker pull ${params.ecrHost}/${repositoryName}:${params.appVersion}"
                     }
-                    sh "docker run -p 80:5000 -d ${registryHost}/${repositoryName}:${params.appVersion}"
+                    sh "docker run -p 80:5000 -d ${params.ecrHost}/${repositoryName}:${params.appVersion}"
                     echo "########################################################################################"
                     echo "### curl http://${webserverDnsName}"
                     echo "########################################################################################"
