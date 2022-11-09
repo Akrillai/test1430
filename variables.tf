@@ -1,7 +1,7 @@
 # variables.tf
 
 variable "keyName" {
-   default = "aws-ec2-key.pub"
+   default = "devops-cert_task-key"
 }
 
 variable "region" {
@@ -9,7 +9,7 @@ variable "region" {
 }
 
 variable "instanceType" {
-   default = "t2.micro"
+   default = "t2.small"
 }
 
 # Ubuntu 22.04
