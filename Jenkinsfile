@@ -26,7 +26,7 @@ pipeline {
                 sh 'terraform show -no-color tfplan > tfplan.txt'
             }
         }
-        def dd_ip
+        
         stage('Apply Terraform plan and obtain dns name of the instances created') {
             steps {
                 sh "terraform apply -input=false tfplan"
