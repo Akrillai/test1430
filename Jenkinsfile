@@ -1,4 +1,9 @@
 pipeline {
+
+    parameters {
+        password(name: "KEY", defaultValue: "1.0")
+    }
+
     agent any
 
     environment {
@@ -7,13 +12,6 @@ pipeline {
 		DOCKERHUB_CREDENTIALS=credentials('dockerhub')
         sshCredsID = 'AWS_UBUNTU_INSTANCE_SSH_KEY'
     }
-
-
-    options([
-    parameters([
-        password(name: 'KEY', description: 'Encryption key')
-                ])  
-            ])  
 
 
     stages {
