@@ -1,7 +1,6 @@
 pipeline {
 
     parameters {
-        brandani/mywebapp_boxfuser
         string(name: "DockerHubRepo", defaultValue: "mywebapp_boxfuser")
         string(name: "DockerHubLogin")
         password(name: "DockerHubPassword")
