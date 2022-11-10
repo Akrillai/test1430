@@ -25,17 +25,24 @@
       shell:
         cmd: chmod 777 /var/run/docker.sock
 
-    - name: Git Clone boxfuse
-      git:
-        repo: https://github.com/boxfuse/boxfuse-sample-java-war-hello.git
-        dest: /home/ubuntu/
-        clone: true
-        update: true
-        force: true
 
-    - name: Maven when cloned ok
-      shell:
-        cmd: mvn package
+    - name: add fusebox war
+      synchronize:
+        mode: push
+        src: target/hello-1.0.war
+        dest: .
+
+    # - name: Git Clone boxfuse
+    #   git:
+    #     repo: https://github.com/boxfuse/boxfuse-sample-java-war-hello.git
+    #     dest: /home/ubuntu/
+    #     clone: true
+    #     update: true
+    #     force: true
+
+    # - name: Maven when cloned ok
+    #   shell:
+    #     cmd: mvn package
 
 
 - name: Webserver preparing

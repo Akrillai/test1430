@@ -11,7 +11,7 @@
 
 FROM tomcat:latest
 
-ADD ./target/hello-1.0.war /usr/local/tomcat/webapps/
+ADD hello-1.0.war /usr/local/tomcat/webapps/
 
 EXPOSE 8080
 
