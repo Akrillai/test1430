@@ -1,11 +1,4 @@
 pipeline {
-    // parameters {
-    //     string(name: "appVersion", defaultValue: "1.0")
-    //     string(name: "ecrHost", defaultValue: "")
-    //     booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
-    //     booleanParam(name: 'destroy', defaultValue: false, description: 'Destroy Terraform build?')
-    // }
-
     agent any
 
     environment {
@@ -13,8 +6,6 @@ pipeline {
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
 		DOCKERHUB_CREDENTIALS=credentials('dockerhub')
         sshCredsID = 'AWS_UBUNTU_INSTANCE_SSH_KEY'
-        repositoryName = 'cert_task'
-        registryCredsID = 'AWS_ECR_CREDENTIALS'
     }
 
     	  tools
@@ -108,7 +99,10 @@ pipeline {
             }
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
-                    sh "docker run -d -p 8080:8080 brandani/mywebapp_boxfuser"}
+                    sh "docker run -d -p 8080:8080 brandani/mywebapp_boxfuser"
+                    echo "########################################################################################"
+                    echo "### curl http://${webserverDnsName}:8080/hello-1.0/"
+                    echo "########################################################################################"}
                 }
             }
 
