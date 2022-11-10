@@ -4,22 +4,24 @@ pipeline {
         string(name: "DockerHubRepo", defaultValue: "mywebapp_boxfuser")
         string(name: "DockerHubLogin")
         password(name: "DockerHubPassword")
-
+        password(name: "AWS_ACCESS_KEY_ID")
+        password(name: "AWS_SECRET_ACCESS_KEY")
     }
 
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-		// DOCKERHUB_CREDENTIALS=credentials('dockerhub')
+        // AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        // AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+        AWS_ACCESS_KEY_ID     = ${AWS_ACCESS_KEY_ID}
+        AWS_SECRET_ACCESS_KEY = ${AWS_SECRET_ACCESS_KEY}
         sshCredsID = 'AWS_UBUNTU_INSTANCE_SSH_KEY'
     }
 
 
     stages {
 
-        stage('Plan') {
+        stage('Terraform init and plan') {
             steps {
                 sh 'terraform init -input=false'
                 sh "terraform plan -input=false -out tfplan"
@@ -27,7 +29,7 @@ pipeline {
             }
         }
 
-        stage('Apply') {
+        stage('Apply Terraform plan') {
             steps {
                 sh "terraform apply -input=false tfplan"
                 script {
@@ -44,7 +46,7 @@ pipeline {
         } 
 
 
-        stage('Ansible playbook') {
+        stage('Prepare instances via Ansible') {
 
             steps {
                 sh "if [ -f hosts ]; then rm hosts; fi"
@@ -62,14 +64,13 @@ pipeline {
             }
         } 
 
-        stage('Builder fetch and build') {
+        stage('Build and push Docker image') {
             environment {
                 DOCKER_HOST="ssh://ubuntu@${builderDnsName}"
             }
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
                     sh "docker build -t ${DockerHubLogin}/${DockerHubRepo}:latest ."
-                    // sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
                     sh "echo ${DockerHubPassword} | docker login -u ${DockerHubLogin} --password-stdin"
                     sh "docker push ${DockerHubLogin}/${DockerHubRepo}:latest"
 
@@ -77,7 +78,7 @@ pipeline {
             }
         }
 
-        stage('Webserver stop and remove') {
+        stage('Delete existing docker containers') {
             environment {
                 DOCKER_HOST="ssh://ubuntu@${webserverDnsName}"
             }
@@ -89,7 +90,7 @@ pipeline {
                 }
             }
 
-        stage('Run Docker container on remote hosts') {
+        stage('Run Docker container on the websrever') {
             environment {
                 DOCKER_HOST="ssh://ubuntu@${webserverDnsName}"
             }

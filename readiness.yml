@@ -1,5 +1,5 @@
 ---
-- name: Builder preparing
+- name: Builder preparation
   hosts: builder
   become: true
 
@@ -28,7 +28,6 @@
       shell:
         cmd: chmod 777 /var/run/docker.sock
 
-
     - name: pass src for build
       synchronize:
         mode: push
@@ -46,7 +45,7 @@
         cmd: mvn package
 
 
-- name: Webserver preparing
+- name: Webserver preparation
   hosts: webserver
   become: true
 
