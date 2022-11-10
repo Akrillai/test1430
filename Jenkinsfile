@@ -1,15 +1,19 @@
 pipeline {
 
     parameters {
-        password(name: "KEY", defaultValue: "1.0")
+        brandani/mywebapp_boxfuser
+        string(name: "DockerHubRepo", defaultValue: "brandani/mywebapp_boxfuser")
+        string(name: "DockerHubLogin")
+        password(name: "DockerHubPassword")
+
     }
 
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
-		DOCKERHUB_CREDENTIALS=credentials('dockerhub')
+        // AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
+        // AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
+		// DOCKERHUB_CREDENTIALS=credentials('dockerhub')
         sshCredsID = 'AWS_UBUNTU_INSTANCE_SSH_KEY'
     }
 
@@ -59,17 +63,17 @@ pipeline {
             }
         } 
 
-
+${DockerHubRepo}
         stage('Builder fetch and build') {
             environment {
                 DOCKER_HOST="ssh://ubuntu@${builderDnsName}"
             }
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
-                    sh "docker build -t brandani/mywebapp_boxfuser:latest ."
+                    sh "docker build -t ${DockerHubRepo}:latest ."
                     // sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
-                    sh "echo ${KEY} | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
-                    sh 'docker push brandani/mywebapp_boxfuser:latest'
+                    sh "echo ${DockerHubPassword} | docker login -u ${DockerHubLogin} --password-stdin"
+                    sh "docker push ${DockerHubRepo}:latest"
 
                 }
             }
