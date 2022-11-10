@@ -48,7 +48,7 @@ pipeline {
                     playbook: 'readiness.yml',
                     inventory: 'hosts',
                     credentialsId: "${sshCredsID}",
-                    disableHostKeyChecking: true,
+                    disableHostKeyChecking: false,
                     become: true,
                 )
             }
