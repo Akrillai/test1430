@@ -6,7 +6,7 @@
 <h1>Congratulations!</h1>
 <img src="boxfuse.png">
 
-<h2>You have successfully launched your Instance, thank you Youtube and Jenkins.io, thank you Fox!!</h2>
+<h2>You have successfully launched your Instance, thank you Youtube and Jenkins.io!!</h2>
 
 <p>This Instance is running on <strong><%= System.getenv("BOXFUSE_PLATFORM_NAME") %>
 </strong> and has the id <strong><%= System.getenv("BOXFUSE_INSTANCE_ID") %>
