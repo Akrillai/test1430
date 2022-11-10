@@ -1,18 +1,15 @@
-# main.tf
-
-######
-# create ec2 default security group
-resource "aws_security_group" "sg_default" {
-  name = var.securityGroupDefault
-  description = "[Terraform] Default ACL"
-
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "4.36.1"
+    }
   }
+}
 
+
+resource "aws_security_group" "allow_app_traffic" {
+  name        = "easy_access"
   ingress {
     description = "app from anywhere"
     from_port   = 8080
@@ -20,62 +17,45 @@ resource "aws_security_group" "sg_default" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = -1
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-######
-
-######
-# create ec2 web security group
-resource "aws_security_group" "sg_web" {
-  name = var.securityGroupWeb
-  description = "[Terraform] Web ACL"
-
   ingress {
-    from_port   = 80
-    to_port     = 80
+    description = "ssh"
+    from_port   = 22
+    to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-}
-######
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 
-# create ec2 builder instance
+}
 resource "aws_instance" "builder_instance" {
-  ami                        = var.ami
-  instance_type              = var.instanceType
+  ami                        = "ami-04842bc62789b682e"
+  instance_type              = "t2.small"
   key_name                   = "AWS_EC2s"
-  vpc_security_group_ids     = [ aws_security_group.sg_default.id ]
+  vpc_security_group_ids     = ["${aws_security_group.allow_app_traffic.id}"]
 
   tags = {
-    Name = var.instanceNameBuilder
+    Name = "devops-cert_task-builder"
   }
 
-  volume_tags = {
-    Name = var.instanceNameBuilder
-  }
 }
 
 # create ec2 webserver instance
 resource "aws_instance" "webserver_instance" {
-  ami                        = var.ami
-  instance_type              = var.instanceType
+  ami                        = "ami-04842bc62789b682e"
+  instance_type              = "t2.small"
   key_name                   = "AWS_EC2s"
-  vpc_security_group_ids     = [ aws_security_group.sg_default.id,
-                                 aws_security_group.sg_web.id ]
+  vpc_security_group_ids     = ["${aws_security_group.allow_app_traffic.id}"]
+
 
   tags = {
-    Name = var.instanceNameWebserver
+    Name = "devops-cert_task-webserver"
   }
 
-  volume_tags = {
-    Name = var.instanceNameWebserver
-  }
 }
 
 # end of main.tf
