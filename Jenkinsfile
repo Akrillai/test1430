@@ -81,10 +81,13 @@ pipeline {
                 DOCKER_HOST="ssh://ubuntu@${webserver_public_ip}"
             }
             steps {
-                sshagent( credentials:["${sshec2key}"] ) {
-                    sh "for IM in \$(docker ps -q); do docker stop \$IM; done"
-                    sh "for IM in \$(docker ps -a -q); do docker rm \$IM; done"
-                    sh "for IM in \$(docker images -q); do docker rmi \$IM; done"}
+                ansiblePlaybook(
+                    playbook: 'container_clean.yml',
+                    inventory: 'hosts',
+                    credentialsId: "${sshec2key}",
+                    disableHostKeyChecking: true,
+                    become: true,
+                )
                 }
             }
 
