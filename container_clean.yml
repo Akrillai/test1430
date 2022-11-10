@@ -4,14 +4,14 @@
   become: true
 
   tasks:
-    - name: Maven when cloned ok
+    - name: remove images 
       shell:
-        cmd: for IM in (docker ps -q); do docker stop IM; done
+        cmd: docker rmi $(docker images -a -q)
 
-    - name: Maven when cloned ok
+    - name: stop containers
       shell:
-        cmd: for IM in (docker ps -a -q); do docker rm IM; done
+        cmd: docker stop $(docker ps -a -q)
 
-    - name: Maven when cloned ok
+    - name: remove containers
       shell:
-        cmd: for IM in (docker images -q); do docker rmi IM; done
+        cmd: docker rm $(docker ps -a -q)
