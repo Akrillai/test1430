@@ -29,7 +29,7 @@
     - name: add fusebox war
       synchronize:
         mode: push
-        src: target/hello-1.0.war
+        src: target
         dest: .
 
     # - name: Git Clone boxfuse
