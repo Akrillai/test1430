@@ -22,13 +22,14 @@ pipeline {
         stage('Plan') {
             steps {
                 sh 'terraform init -input=false'
-                sh "terraform plan -input=false"
+                sh "terraform plan -input=false -out tfplan"
+                sh 'terraform show -no-color tfplan > tfplan.txt'
             }
         }
 
         stage('Apply') {
             steps {
-                sh "terraform apply -input=false"
+                sh "terraform apply -input=false tfplan"
                 script {
                     builderDnsName = sh(
                        script: "terraform output -raw builder_dns_name",
