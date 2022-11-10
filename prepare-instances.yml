@@ -25,16 +25,16 @@
       shell:
         cmd: chmod 777 /var/run/docker.sock
 
-  - name: Git Clone boxfuse
-    git:
-      repo: https://github.com/boxfuse/boxfuse-sample-java-war-hello.git
-      clone: true
-      update: true
-      force: true
+    - name: Git Clone boxfuse
+      git:
+        repo: https://github.com/boxfuse/boxfuse-sample-java-war-hello.git
+        clone: true
+        update: true
+        force: true
 
-  - name: Maven when cloned ok
-    shell:
-      cmd: mvn package
+    - name: Maven when cloned ok
+      shell:
+        cmd: mvn package
 
 
 - name: Webserver preparing
