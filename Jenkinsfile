@@ -62,7 +62,6 @@ pipeline {
             }
         } 
 
-${DockerHubRepo}
         stage('Builder fetch and build') {
             environment {
                 DOCKER_HOST="ssh://ubuntu@${builderDnsName}"
