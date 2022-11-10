@@ -28,6 +28,7 @@
     - name: Git Clone boxfuse
       git:
         repo: https://github.com/boxfuse/boxfuse-sample-java-war-hello.git
+        dest: .
         clone: true
         update: true
         force: true
