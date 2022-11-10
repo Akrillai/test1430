@@ -17,17 +17,15 @@ pipeline {
         registryCredsID = 'AWS_ECR_CREDENTIALS'
     }
 
+
     stages {
+
         stage('Execute Maven') {
             steps {
                 
                     sh 'mvn package'
             }
         }
-
-
-
-    stages {
 
         stage('Plan') {
             steps {
