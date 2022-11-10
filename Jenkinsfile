@@ -101,7 +101,7 @@ pipeline {
                 sshagent( credentials:["${sshCredsID}"] ) {
                     sh "docker run -d -p 8080:8080 brandani/mywebapp_boxfuser"
                     echo "########################################################################################"
-                    echo "### curl http://${webserverDnsName}:8080/hello-1.0/"
+                    echo "### go to http://${webserverDnsName}:8080/hello-1.0/"
                     echo "########################################################################################"}
                 }
             }
