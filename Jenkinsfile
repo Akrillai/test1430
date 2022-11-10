@@ -2,7 +2,7 @@ pipeline {
 
     parameters {
         brandani/mywebapp_boxfuser
-        string(name: "DockerHubRepo", defaultValue: "brandani/mywebapp_boxfuser")
+        string(name: "DockerHubRepo", defaultValue: "mywebapp_boxfuser")
         string(name: "DockerHubLogin")
         password(name: "DockerHubPassword")
 
@@ -70,10 +70,10 @@ ${DockerHubRepo}
             }
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
-                    sh "docker build -t ${DockerHubRepo}:latest ."
+                    sh "docker build -t ${DockerHubLogin}/${DockerHubRepo}:latest ."
                     // sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
                     sh "echo ${DockerHubPassword} | docker login -u ${DockerHubLogin} --password-stdin"
-                    sh "docker push ${DockerHubRepo}:latest"
+                    sh "docker push ${DockerHubLogin}/${DockerHubRepo}:latest"
 
                 }
             }
@@ -97,7 +97,7 @@ ${DockerHubRepo}
             }
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
-                    sh "docker run -d -p 8080:8080 brandani/mywebapp_boxfuser"
+                    sh "docker run -d -p 8080:8080 ${DockerHubLogin}/${DockerHubRepo}"
                     echo "########################################################################################"
                     echo "### go to http://${webserverDnsName}:8080/hello-1.0/"
                     echo "########################################################################################"}
