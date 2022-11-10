@@ -8,20 +8,8 @@ pipeline {
         sshCredsID = 'AWS_UBUNTU_INSTANCE_SSH_KEY'
     }
 
-    	  tools
-    {
-       maven "m3"
-    }
-
 
     stages {
-
-        stage('Execute Maven') {
-            steps {
-                
-                    sh 'mvn package'
-            }
-        }
 
         stage('Plan') {
             steps {
