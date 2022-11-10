@@ -41,7 +41,7 @@ pipeline {
                     ).trim()
                 }
             }
-        } 
+        }
 
 
         stage('Prepare instances via Ansible') {
