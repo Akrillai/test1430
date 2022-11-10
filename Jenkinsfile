@@ -108,7 +108,7 @@ pipeline {
             }
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
-                    sh "docker -H run -d -p 8080:8080 brandani/mywebapp_boxfuser"}
+                    sh "docker run -d -p 8080:8080 brandani/mywebapp_boxfuser"}
                 }
             }
 
