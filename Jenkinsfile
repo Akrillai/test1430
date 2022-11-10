@@ -52,6 +52,7 @@ pipeline {
                 sh "[ '${builder_public_ip}' = '' ] || echo ${builder_public_ip} >> hosts"
                 sh "echo '[webserver]' >> hosts"
                 sh "[ '${webserver_public_ip}' = '' ] || echo ${webserver_public_ip} >> hosts"
+                
                 ansiblePlaybook(
                     playbook: 'readiness.yml',
                     inventory: 'hosts',
