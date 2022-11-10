@@ -17,6 +17,11 @@ pipeline {
         registryCredsID = 'AWS_ECR_CREDENTIALS'
     }
 
+    	  tools
+    {
+       maven "m3"
+    }
+
 
     stages {
 
