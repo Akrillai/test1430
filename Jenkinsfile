@@ -28,7 +28,7 @@ pipeline {
         stage('Execute Maven') {
             steps {
                 
-                    sh 'mvn package'
+                    sh 'sudo mvn package'
             }
         }
 
