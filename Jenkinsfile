@@ -9,6 +9,13 @@ pipeline {
     }
 
 
+    properties([
+    parameters([
+        password(name: 'KEY', description: 'Encryption key')
+                ])  
+            ])  
+
+
     stages {
 
         stage('Plan') {
@@ -62,7 +69,8 @@ pipeline {
             steps {
                 sshagent( credentials:["${sshCredsID}"] ) {
                     sh "docker build -t brandani/mywebapp_boxfuser:latest ."
-                    sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
+                    // sh "echo $DOCKERHUB_CREDENTIALS_PSW | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
+                    sh "echo ${KEY} | docker login -u $DOCKERHUB_CREDENTIALS_USR --password-stdin"
                     sh 'docker push brandani/mywebapp_boxfuser:latest'
 
                 }
