@@ -44,7 +44,6 @@ resource "aws_instance" "builder_instance" {
 
 }
 
-# create ec2 webserver instance
 resource "aws_instance" "webserver_instance" {
   ami                        = "ami-04842bc62789b682e"
   instance_type              = "t2.small"
@@ -57,5 +56,3 @@ resource "aws_instance" "webserver_instance" {
   }
 
 }
-
-# end of main.tf

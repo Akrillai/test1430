@@ -26,8 +26,8 @@ pipeline {
                 sh 'terraform show -no-color tfplan > tfplan.txt'
             }
         }
-        
-        stage('Apply Terraform plan and obtain dns name of the instances created') {
+
+        stage('Apply Terraform plan and obtain IPs of the instances created') {
             steps {
                 sh "terraform apply -input=false tfplan"
                 script {
@@ -82,9 +82,9 @@ pipeline {
             }
             steps {
                 sshagent( credentials:["${sshec2key}"] ) {
-                    sh "for ID in \$(docker ps -q); do docker stop \$ID; done"
-                    sh "for ID in \$(docker ps -a -q); do docker rm \$ID; done"
-                    sh "for ID in \$(docker images -q); do docker rmi \$ID; done"}
+                    sh "for IM in \$(docker ps -q); do docker stop \$IM; done"
+                    sh "for IM in \$(docker ps -a -q); do docker rm \$IM; done"
+                    sh "for IM in \$(docker images -q); do docker rmi \$IM; done"}
                 }
             }
 
@@ -96,8 +96,12 @@ pipeline {
                 sshagent( credentials:["${sshec2key}"] ) {
                     sh "docker run -d -p 8080:8080 ${DockerHubLogin}/${DockerHubRepo}"
                     echo "########################################################################################"
+                    echo "########################################################################################"
+                    echo "########################################################################################"
                     echo "### go to http://${webserver_public_ip}:8080/hello-1.0/"
-                    echo "########################################################################################"}
+                    echo "########################################################################################"
+                    echo "########################################################################################"
+                    echo "########################################################################################" }
                 }
             }
 
