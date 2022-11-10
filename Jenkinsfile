@@ -88,6 +88,7 @@ pipeline {
                     sh "for ID in \$(docker images -q); do docker rmi \$ID; done"
                 }
             }
+        }
 
         stage('Run Docker container on the websrever') {
             environment {
