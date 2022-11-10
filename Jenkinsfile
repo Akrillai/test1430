@@ -9,7 +9,7 @@ pipeline {
     }
 
 
-    properties([
+    options([
     parameters([
         password(name: 'KEY', description: 'Encryption key')
                 ])  
