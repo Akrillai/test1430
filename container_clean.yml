@@ -6,12 +6,12 @@
   tasks:
     - name: stop containers
       shell:
-        cmd: docker stop $(docker ps -a -q)
-        
+        cmd: docker stop $(docker ps -a -q) 
+
     - name: remove images 
       shell:
-        cmd: docker rmi $(docker images -a -q)
+        cmd: docker rmi $(docker images -a -q) --force
 
     - name: remove containers
       shell:
-        cmd: docker rm $(docker ps -a -q)
+        cmd: docker rm $(docker ps -a -q) --force
