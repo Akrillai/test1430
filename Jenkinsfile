@@ -57,7 +57,7 @@ pipeline {
                 sh "echo '[webserver]' >> hosts"
                 sh "[ '${webserverDnsName}' = '' ] || echo ${webserverDnsName} >> hosts"
                 ansiblePlaybook(
-                    playbook: 'prepare-instances.yml',
+                    playbook: 'readiness.yml',
                     inventory: 'hosts',
                     credentialsId: "${sshCredsID}",
                     disableHostKeyChecking: true,

@@ -4,11 +4,14 @@
   become: true
 
   tasks:
-    - name: Ensure docker.io package is present
+    - name: Install needed packages
       apt:
-        name: docker.io
+        name: "{{item}}"
         state: present
         update_cache: true
+      with_items:
+        - maven
+        - docker.io
 
     - name: Ensure docker.service is running
       service:
@@ -26,11 +29,22 @@
         cmd: chmod 777 /var/run/docker.sock
 
 
-    - name: add fusebox war
+    - name: pass src for build
       synchronize:
         mode: push
-        src: target
+        src: src
         dest: .
+
+    - name: pass xml for build
+      synchronize:
+        mode: push
+        src: pom.xml
+        dest: .
+
+    - name: Maven when cloned ok
+      shell:
+        cmd: mvn package
+
 
 - name: Webserver preparing
   hosts: webserver
