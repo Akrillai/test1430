@@ -5,22 +5,19 @@
 
   tasks:
     - name: stop containers
-      shell:
-        cmd: docker stop $(docker ps -a -q)
-        register: result
-        failed_when:
-          - '"requires at least 1 argument" not in result.stdout'
+      command: docker stop $(docker ps -a -q)
+      register: result
+      failed_when:
+        - '"requires at least 1 argument" not in result.stdout'
 
     - name: remove images 
-      shell:
-        cmd: docker rmi $(docker images -a -q) --force
-        register: result
-        failed_when:
-          - '"requires at least 1 argument" not in result.stdout'
+      command: docker rmi $(docker images -a -q) --force
+      register: result
+      failed_when:
+        - '"requires at least 1 argument" not in result.stdout'
 
     - name: remove containers
-      shell:
-        cmd: docker rm $(docker ps -a -q) --force
-        register: result
-        failed_when:
-          - '"requires at least 1 argument" not in result.stdout'
+      command: docker rm $(docker ps -a -q) --force
+      register: result
+      failed_when:
+        - '"requires at least 1 argument" not in result.stdout'
