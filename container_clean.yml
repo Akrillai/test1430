@@ -4,13 +4,13 @@
   become: true
 
   tasks:
-    - name: remove images 
-      shell:
-        cmd: docker rmi $(docker images -a -q)
-
     - name: stop containers
       shell:
         cmd: docker stop $(docker ps -a -q)
+        
+    - name: remove images 
+      shell:
+        cmd: docker rmi $(docker images -a -q)
 
     - name: remove containers
       shell:
