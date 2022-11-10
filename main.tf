@@ -9,7 +9,7 @@ terraform {
 
 
 resource "aws_security_group" "allow_app_traffic" {
-  name        = "easy_access"
+  name        = "easy_access_cert"
   ingress {
     description = "app from anywhere"
     from_port   = 8080
